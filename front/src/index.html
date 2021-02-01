@@ -1,0 +1,121 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+        <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/core.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>MyCV</title>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand navbar-dark shadow fixed-top">
+            <div class="container-fluid">
+                <a id="userUrlLink" class="navbar-brand" href="/">MyCV</a>
+                <div id="loggedOutContainer">
+                    <button type="button" class="btn btn-secondary btn-sm nav-form" data-toggle="modal" data-target="#injectedModal" onclick="requestLoginModal()" >
+                        Login
+                    </button>
+                </div>
+                <div id="loggedInContainer" class="nav-item dropdown btn-group dropleft" style="display: none;">
+                    <!-- <button type="button" class="btn btn-secondary btn-sm nav-form" data-toggle="modal" data-target="#loginModal" onclick="clearLoginError()" ></button> -->
+                    <a class="btn btn-secondary dropdown-toggle btn-sm nav-form" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Account
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a id="userLinkContainer" class="dropdown-item" href="#"></a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <!-- Account Modals -->
+                        <a class="dropdown-item " href="#" onclick="requestShareModal()">Share</a>
+                        <a class="dropdown-item" href="#" onclick="requestManageModal()">Manage</a>
+
+                        <div class="dropdown-divider"></div>
+                        
+                        <!-- Quick Settings. -->
+                        <div class="dropdown-item">
+                            <div class="form-group form-check m-0">
+                                <input disabled checked type="checkbox" class="form-check-input" id="exampleCheck1">
+                                <label class="form-check-label" for="exampleCheck1">Edit</label>
+                            </div>
+                        </div>
+                        <div class="dropdown-item">
+                            <div class="form-group form-check m-0">
+                                <input disabled type="checkbox" class="form-check-input" id="exampleCheck1">
+                                <label class="form-check-label" for="exampleCheck1">Hide</label>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item" onclick="logoutSubmit()">Sign Out</a>
+                        
+                        <!-- <div class="dropdown-divider"></div> -->
+                        <!-- Probably should be in change password modal, as we are editting user account stuff -->
+                        <!-- Plus it would be one more step to prevent accidental deletion. -->
+                        <!-- <a class="dropdown-item" href="#" style='color: red' onclick="deleteSubmit()">Delete Account</a> -->
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <img src='/resources/smile.png' class="rounded mx-auto d-block" style="height:35px;margin-bottom:16px;">
+        <div class="container" id='userContainer' style="display: none;">
+            <div id='titleContainer'>
+                <div id='editDetailsInjectionPoint' class="row">
+                    <div class="col">
+                        <h2 id='displayName' class="mb-0"></h2>
+                        <p id='title' class="text-muted m-0"></p>
+                    </div>
+                </div>
+                <hr>
+            </div>
+            <div id='aboutContainer'>
+                <div id='aboutEditInjectionPoint' class='row'>
+                    <div class='col'>
+                        <h4 class="" >About</h4>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div id='experienceContainer'>
+                <div id='addExperienceInjectionPoint' class='row'>
+                    <div class='col'>
+                        <h4 class="">Experience</h4>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div id='qualificationsContainer'>
+                <div id='addQualificationInjectionPoint' class='row'>
+                    <div class='col'>
+                        <h4 class="">Qualifications</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id='userNotFoundContainer' style="display: none;">
+            <div class="container alert alert-info w-50 text-center" role="alert">
+                User not found. 
+                <a class="" onclick="requestSignUpModal()">Click Here</a> to create an account.
+            </div>
+        </div>
+        <div id='landingPage'>
+            <div class="container">
+                <h4>Why Use MyCV Over LinkedIn</h4>
+                <ul>
+                    <li>Ability to hide profile from annoying recruiters</li>
+                    <li>Easy to share with others using personal URL.</li>
+                    <li>Uniform formatting showing only the information recruiters need to see.</li>
+                </ul>
+                <a class="" onclick="requestSignUpModal()">Click Here</a> to create an account.
+            </div>
+        </div>
+        
+        <div id="htmlInjectionContainer"></div>
+    </body>
+    <script src="script.js"></script>
+</html>
