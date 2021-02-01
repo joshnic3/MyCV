@@ -1,2 +1,3 @@
 #!/bin/sh
-python3 $MYCY/back/App/server.py
+echo "Starting Python Data Server..."
+python3 App/server.py &
