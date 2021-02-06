@@ -167,75 +167,74 @@ function displayUser(userDict) {
         }
         
         // Render default user details.
-        document.getElementById('displayName').innerHTML = userDict['display_name'];
-        document.getElementById('title').innerHTML = userDict['title'];
+        document.getElementById('displayName').innerHTML = userDict['details']['header_1'];
+        document.getElementById('title').innerHTML = userDict['details']['header_2'];
         if (viewingSelf) {
             editDetailsDiv = document.getElementById('editDetailsInjectionPoint');
-            editDetailsDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestEditModal(\'details\', \''+ userDict['id'] +'\')" data-toggle="modal" data-target="#editModal" type="button" class="btn btn-sm btn-link">Edit</button></div>';
+            editDetailsDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestEditModal(\'details\', \''+ userDict['details']['id'] +'\')" data-toggle="modal" data-target="#editModal" type="button" class="btn btn-sm btn-link">Edit</button></div>';
         }
 
         // Render about.        
         var aboutDiv = document.getElementById('aboutContainer')
-        if (userDict['bio'] == null) {
+        if (userDict['about'] == null) {
             if (!viewingSelf) {
                 aboutDiv.style.display = 'none';    
             } else {
                 aboutDiv.style.display = 'block';
                 addAboutDiv = document.getElementById('aboutEditInjectionPoint');
-                addAboutDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestAddModal(\'bio\', \''+ userDict['bio'] +'\')" type="button" class="btn btn-sm btn-link">Add</button></div>';
+                addAboutDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestAddModal(\'about\', \''+ userDict['about'] +'\')" type="button" class="btn btn-sm btn-link">Add</button></div>';
             }
         } else {
             aboutDiv.style.display = 'block';
-            data = userDict['bio'];
-            aboutDiv.innerHTML += '<p>' + data['text'] + '</p>';
+            aboutDiv.innerHTML += '<p>' + userDict['about']['text'] + '</p>';
             if (viewingSelf) {
                 editAboutDiv = document.getElementById('aboutEditInjectionPoint');
-                editAboutDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestEditModal(\'bio\', \''+ data['id'] +'\')" data-toggle="modal" data-target="#editModal" type="button" class="btn btn-sm btn-link">Edit</button></div>';
+                editAboutDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestEditModal(\'about\', \''+ userDict['about']['id'] +'\')" data-toggle="modal" data-target="#editModal" type="button" class="btn btn-sm btn-link">Edit</button></div>';
             }
         }
         
 
         // Render experiences.
         var experiencesDiv = document.getElementById('experienceContainer')
-        if (userDict['experiences'] == null) {
+        if (userDict['experience'] == null) {
             if (!viewingSelf) {
                 experiencesDiv.style.display = 'none';    
             } else {
                 experiencesDiv.style.display = 'block';
                 addExperiencesDiv = document.getElementById('addExperienceInjectionPoint');
-                addExperiencesDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestAddModal(\'experiences\', \''+ userDict['experiences'] +'\')" type="button" class="btn btn-sm btn-link">Add</button></div>';
+                addExperiencesDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestAddModal(\'experience\', \''+ userDict['experience'] +'\')" type="button" class="btn btn-sm btn-link">Add</button></div>';
             }
         } else {
             experiencesDiv.style.display = 'block';
             if (viewingSelf) {
                 addExperienceDiv = document.getElementById('addExperienceInjectionPoint');
-                addExperienceDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestAddModal(\'experiences\', \''+ userDict['experiences'] +'\')" type="button" class="btn btn-sm btn-link">Add</button></div>';
+                addExperienceDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestAddModal(\'experience\', \''+ userDict['experience'] +'\')" type="button" class="btn btn-sm btn-link">Add</button></div>';
             }
-            for (i in userDict['experiences']) {
-                var experience = userDict['experiences'][i];
-                experiencesDiv.innerHTML += renderRowData('experiences', experience, viewingSelf, experience['employer_id'], experience['position']);
+            for (i in userDict['experience']) {
+                var experience = userDict['experience'][i];
+                experiencesDiv.innerHTML += renderRowData('experience', experience, viewingSelf, experience['header_1'], experience['header_2']);
             }
         }
 
         // Render qualifcations.
         var qualifcationsDiv = document.getElementById('qualificationsContainer')
-        if (userDict['qualifications'] == null) {
+        if (userDict['qualification'] == null) {
             if (!viewingSelf) {
                 qualifcationsDiv.style.display = 'none';    
             } else {
                 qualifcationsDiv.style.display = 'block';
                 addQualificationsDiv = document.getElementById('addQualificationInjectionPoint');
-                addQualificationsDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestAddModal(\'qualifications\', \''+ userDict['qualifications'] +'\')" type="button" class="btn btn-sm btn-link">Add</button></div>';
+                addQualificationsDiv.innerHTML += '<div class="col col-sm-1 text-right"><button onclick="requestAddModal(\'qualification\', \''+ userDict['qualification'] +'\')" type="button" class="btn btn-sm btn-link">Add</button></div>';
             }
         } else {
             qualifcationsDiv.style.display = 'block';
             if (viewingSelf) {
                 addQualificationDiv = document.getElementById('addQualificationInjectionPoint');
-                addQualificationDiv.innerHTML += '<div class="col col-sm-1 text-right"><button  onclick="requestAddModal(\'qualifications\', \''+ data['id'] +'\')" type="button" class="btn btn-sm btn-link">Add</button></div>';
+                addQualificationDiv.innerHTML += '<div class="col col-sm-1 text-right"><button  onclick="requestAddModal(\'qualification\', \''+ userDict['qualification'] +'\')" type="button" class="btn btn-sm btn-link">Add</button></div>';
             }
-            for (i in userDict['qualifications']) {
-                var qualification = userDict['qualifications'][i];
-                qualifcationsDiv.innerHTML += renderRowData('qualifications', qualification, viewingSelf, qualification['school_id'], qualification['level']);
+            for (i in userDict['qualification']) {
+                var qualification = userDict['qualification'][i];
+                qualifcationsDiv.innerHTML += renderRowData('qualification', qualification, viewingSelf, qualification['header_1'], qualification['header_2']);
             }
         }
     }
@@ -312,47 +311,28 @@ function deleteSubmit(deleteType, rowId) {
 // EDIT & ADD ----------------------------------------------------------------------
 
 function buildChangeDictionary(editType) {
+    console.log(editType);
     keyMap = {
-        'details': {
-            'where': 'display_name',
-            'what': 'title'
-        },
-        'bio': {
-            'text': 'text'
-        },
-        'experiences': {
-            'where': 'employer_id',
-            'what': 'position',
-            'start_date': 'start_date',
-            'end_date': 'end_date',
-            'text': 'text'
-        },
-        'qualifications': {
-            'where': 'school_id',
-            'what': 'level',
-            'start_date': 'start_date',
-            'end_date': 'end_date',
-            'text': 'text'
-        },
-        'details': {
-            // TODO Email need own submit function to remove passwords, then can use edit.
-            'manageEmail': 'email',
-            'manageNewPassword': 'password',
-            'manageConfirmNewPassword': 'password_check'
-        }
+        'user': ['email', 'hidden'],
+        'authentication': ['password', 'password_check'],
+        'details': ['header_1', 'header_2'],
+        'about': ['text'],
+        'experience': ['header_1', 'header_2', 'start_date', 'end_date', 'text'],
+        'qualification': ['header_1', 'header_2', 'start_date', 'end_date', 'text']
     }
 
     // Build edit dictionary.
     editDict = {};
-    for (const [key, mappedKey] of Object.entries(keyMap[editType])) {
+    for (const key of keyMap[editType]) {
         input = document.getElementById(key);
         if (input && input.value != null) {
-            editDict[mappedKey] = input.value;
+            editDict[key] = input.value;
         }
     }
 
     finalDict = {};
     finalDict[editType] = editDict;
+    console.log(finalDict);
     return finalDict;
 }
 
@@ -372,18 +352,18 @@ function editEmail() {
     document.getElementById('manageNewPassword').value = '';
     document.getElementById('manageConfirmNewPassword').value = '';
 
-    editDict = buildChangeDictionary('details');
+    editDict = buildChangeDictionary('user');
     editDict['edit_id'] = read_cookie('user_id');
     requestPost(edit_url, editDict, responseCompleted);
 }
 
 function submitPasswordChange() {
-    passwordDict = buildChangeDictionary('details');
-    if(passwordDict['details']['password'] == passwordDict['details']['password_check']) {
+    passwordDict = buildChangeDictionary('authentication');
+    if(passwordDict['authentication']['password'] == passwordDict['authentication']['password_check']) {
         requestDict = {
-            'password': passwordDict['details']['password']
+            'password': passwordDict['authentication']['password']
         }
-        requestPost(changePasswordUrl, requestDict, editCompleted);
+        requestPost(changePasswordUrl, requestDict, responseCompleted);
     } else {
         responseCompleted({'error': 'Passwords don\'t match!'});
     }

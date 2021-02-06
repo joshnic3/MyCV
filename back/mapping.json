@@ -1,0 +1,27 @@
+{
+  "display_text_map": {
+    "details": {
+      "header_1": "Display Name",
+      "header_2": "Headline"
+    },
+    "about": {
+      "text": "About"
+    },
+    "experience": {
+      "title": "Experience",
+      "header_1": "Company",
+      "header_2": "Position",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "text": "Details"
+    },
+    "qualification": {
+      "title": "Qualification",
+      "header_1": "School",
+      "header_2": "Subject",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "text": "Details"
+    }
+  }
+}

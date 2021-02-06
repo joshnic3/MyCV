@@ -1,11 +1,8 @@
-import json
-import os
-
-from Library.core import Database, Constants, Formatting
-from Library.constants import SCHEMA
 import datetime
+import json
 
-import sqlite3
+from Library.constants import Schema, Components
+from Library.core import Database, Formatting
 
 
 class DAO:
@@ -20,7 +17,7 @@ class DAO:
 
     @staticmethod
     def _current_time_as_string():
-        return datetime.datetime.now().strftime(Constants.DATETIME_DB_FORMAT)
+        return datetime.datetime.now().strftime(Formatting.DATETIME_DB_FORMAT)
 
     def create_table(self, table=None, schema=None, foreign_key=None, parent_table=None):
         table = table if table else self.TABLE
@@ -33,12 +30,12 @@ class DAO:
             return self.SCHEMA.index(column_name)
         return None
 
-    # Return all values as strings, including datetimes.
+    # Return all values as strings, including date times.
     def read(self, entry_id, where_condition=None, sortby=None, distinct=False):
         if where_condition is not None:
             condition = where_condition
         else:
-            condition = {SCHEMA.ID: entry_id} if entry_id is not None else None
+            condition = {Schema.ID: entry_id} if entry_id is not None else None
         return self._database.select(self.TABLE, condition=condition, distinct=distinct, sortby=sortby)
 
     # Assume all values are strings, including datetimes.
@@ -46,13 +43,13 @@ class DAO:
         if where_condition is not None:
             condition = where_condition
         else:
-            condition = {SCHEMA.ID: entry_id} if entry_id is not None else None
+            condition = {Schema.ID: entry_id} if entry_id is not None else None
         return self._database.update(self.TABLE, values_dict, condition)
 
-    # Assume all values are strings, including datetimes.
+    # Assume all values are strings, including date times.
     def new(self, data_dict):
         # Add unique id.
-        data_dict[SCHEMA.ID] = Database.unique_id()
+        data_dict[Schema.ID] = Database.unique_id()
 
         # Check all columns are present.
         missing_columns = [column for column in self.SCHEMA if column not in data_dict.keys()]
@@ -61,7 +58,7 @@ class DAO:
 
         # Write to row, then return id.
         self._database.insert(self.TABLE, data_dict)
-        return data_dict.get(SCHEMA.ID)
+        return data_dict.get(Schema.ID)
 
     def delete(self, where_condition):
         return self._database.delete(self.TABLE, where_condition)
@@ -69,18 +66,7 @@ class DAO:
 
 class UsersDAO(DAO):
     TABLE = 'Users'
-    SCHEMA = [SCHEMA.ID, SCHEMA.USER_EMAIL, SCHEMA.USER_DISPLAY_NAME, SCHEMA.USER_TITLE, SCHEMA.USER_HIDDEN]
-
-    def __init__(self, database_file_path):
-        super().__init__(database_file_path)
-
-    def read_like_display_name(self, search_string):
-        pass
-
-
-class UserAddedItemsDAO(DAO):
-    TABLE = 'UserAddedItems'
-    SCHEMA = [SCHEMA.ID, 'type', 'display_name', 'count', 'verified']
+    SCHEMA = [Schema.ID, Schema.EMAIL, Schema.HIDDEN]
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
@@ -88,33 +74,41 @@ class UserAddedItemsDAO(DAO):
 
 class AuthenticationDAO(DAO):
     TABLE = 'Authentication'
-    SCHEMA = [SCHEMA.ID, SCHEMA.LAST_CHANGED, SCHEMA.USER_ID, SCHEMA.PASSWORD_HASH]
+    SCHEMA = [Schema.ID, Schema.USER, Schema.LAST_CHANGED, Schema.PASSWORD_HASH]
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
-        self.date_time_columns = [SCHEMA.LAST_CHANGED]
+        self.date_time_columns = [Schema.LAST_CHANGED]
 
     def new(self, data_dict):
-        data_dict[SCHEMA.LAST_CHANGED] = Formatting.datetime_to_string(datetime.datetime.now())
+        data_dict[Schema.LAST_CHANGED] = Formatting.datetime_to_string(datetime.datetime.now())
         return super().new(data_dict)
 
 
 class SessionsDAO(DAO):
     TABLE = 'Sessions'
-    SCHEMA = [SCHEMA.ID, SCHEMA.USER_ID, SCHEMA.DATE_CREATED, SCHEMA.SESSION_KEY]
+    SCHEMA = [Schema.ID, Schema.USER, Schema.CREATED, Schema.SESSION_KEY]
 
     def __init__(self, database_file_path):
-        self.date_time_columns = [SCHEMA.DATE_CREATED]
         super().__init__(database_file_path)
+        self.date_time_columns = [Schema.CREATED]
 
     def new(self, data_dict):
-        data_dict[SCHEMA.DATE_CREATED] = Formatting.datetime_to_string(datetime.datetime.now())
+        data_dict[Schema.CREATED] = Formatting.datetime_to_string(datetime.datetime.now())
         return super().new(data_dict)
 
 
-class BiosDAO(DAO):
-    TABLE = 'Bios'
-    SCHEMA = [SCHEMA.ID, SCHEMA.USER_ID, SCHEMA.CONTENT]
+class DetailsDAO(DAO):
+    TABLE = 'Details'
+    SCHEMA = [Schema.ID, Schema.USER, Schema.DISPLAY_NAME, Schema.HEADLINE]
+
+    def __init__(self, database_file_path):
+        super().__init__(database_file_path)
+
+
+class AboutDAO(DAO):
+    TABLE = 'About'
+    SCHEMA = [Schema.ID, Schema.USER, Schema.TEXT]
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
@@ -122,89 +116,95 @@ class BiosDAO(DAO):
 
 class ExperiencesDAO(DAO):
     TABLE = 'Experiences'
-    SCHEMA = [SCHEMA.ID, SCHEMA.USER_ID, SCHEMA.START_DATE, SCHEMA.END_DATE, SCHEMA.EXP_EMPLOYER, SCHEMA.EXP_ROLE, SCHEMA.CONTENT]
+    SCHEMA = [Schema.ID, Schema.USER, Schema.EMPLOYER, Schema.ROLE, Schema.START, Schema.END, Schema.TEXT]
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
-        self.date_time_columns = [SCHEMA.START_DATE, SCHEMA.END_DATE]
+        self.date_time_columns = [Schema.START, Schema.END]
 
 
 class QualificationsDAO(DAO):
     TABLE = 'Qualifications'
-    SCHEMA = [SCHEMA.ID, SCHEMA.USER_ID, SCHEMA.START_DATE, SCHEMA.END_DATE, SCHEMA.QUAL_SCHOOL, SCHEMA.QUAL_SUBJECT, SCHEMA.CONTENT]
+    SCHEMA = [Schema.ID, Schema.USER, Schema.SCHOOL, Schema.SUBJECT, Schema.START, Schema.END, Schema.TEXT]
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
-        self.date_time_columns = [SCHEMA.START_DATE, SCHEMA.END_DATE]
+        self.date_time_columns = [Schema.START, Schema.END]
 
 
-class EmployersDAO(DAO):
-    TABLE = 'Employers'
-    SCHEMA = [SCHEMA.ID]
-
-    def __init__(self, database_file_path):
-        super().__init__(database_file_path)
-
-
-class SchoolsDAO(DAO):
-    TABLE = 'Schools'
-    SCHEMA = [SCHEMA.ID]
+class UserAddedItemsDAO(DAO):
+    TABLE = 'UserAddedItems'
+    SCHEMA = [Schema.ID, Schema.TYPE, Schema.DISPLAY_NAME, Schema.COUNT, Schema.VERIFIED]
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
 
 
-class DatabaseInitiator:
-    DAOS_TO_INITIATE = [UsersDAO, BiosDAO, ExperiencesDAO, QualificationsDAO, AuthenticationDAO, SessionsDAO]
+class Mapping:
+    # JSON file map keys.
+    _DISPLAY_TEXT_MAP = 'display_text_map'
 
-    @staticmethod
-    def create_tables(database_file_path, foreign_key=None, parent_table=None):
-        # foreign_key = 'user_id', parent_table = 'Users'
-        # Open new database file.
-        if not os.path.isfile(database_file_path):
-            with open(database_file_path, 'w+'):
-                pass
-            print('Created database file "{}".'.format(database_file_path))
+    # Component Column Keys.
+    TITLE = 'title'
+    H1 = 'header_1'
+    H2 = 'header_2'
+    START = 'start_date'
+    END = 'end_date'
+    TEXT = 'text'
 
-        # Create tables.
-        for dao in DatabaseInitiator.DAOS_TO_INITIATE:
-            try:
-                if dao.TABLE == parent_table:
-                    dao(database_file_path).create_table()
-                else:
-                    dao(database_file_path).create_table(foreign_key=foreign_key, parent_table=parent_table)
-                # if dao.TABLE == parent_table:
-                #     print('Created parent table table "{}" in "{}".'.format(dao.TABLE, database_file_path))
-                # else:
-                #
-                # if foreign_key is not None and parent_table is not None:
-                #     print('Created cascading table "{}" in "{}".'.format(dao.TABLE, database_file_path))
-                # else:
-                #     print('Created table "{}" in "{}".'.format(dao.TABLE, database_file_path))
+    # Keys in display order.
+    KEYS = [H1, H2, START, END, TEXT]
 
-            except sqlite3.OperationalError as e:
-                print('WARNING: Could not create table "{}". SQL Error: "{}"'.format(dao.TABLE, e))
+    DAOS = {
+        Components.DETAILS: DetailsDAO,
+        Components.ABOUT: AboutDAO,
+        Components.EXPERIENCE: ExperiencesDAO,
+        Components.QUALIFICATION: QualificationsDAO
+    }
 
-    @staticmethod
-    def copy_data(source_file_path, destination_file_path, force_all=False):
-        if force_all:
-            daos_to_copy = DatabaseInitiator.DAOS_TO_INITIATE
-        else:
-            daos_to_copy = [dao for dao in DatabaseInitiator.DAOS_TO_INITIATE if not dao(source_file_path).volatile]
+    SCHEMA = {
+        Components.DETAILS: {
+            H1: Schema.DISPLAY_NAME,
+            H2: Schema.HEADLINE,
+        },
+        Components.ABOUT: {
+            TEXT: Schema.TEXT,
+        },
+        Components.EXPERIENCE: {
+            H1: Schema.EMPLOYER,
+            H2: Schema.ROLE,
+            START: Schema.START,
+            END: Schema.END,
+            TEXT: Schema.TEXT
+        },
+        Components.QUALIFICATION: {
+            H1: Schema.SCHOOL,
+            H2: Schema.SUBJECT,
+            START: Schema.START,
+            END: Schema.END,
+            TEXT: Schema.TEXT
+        }
+    }
 
-        table_rows = {}
-        source_database = Database(source_file_path)
-        for dao in daos_to_copy:
-            try:
-                table_rows[dao.TABLE] = dao(source_file_path).read()[1:]
-                print('Copied "{}" data to "{}".'.format(dao.TABLE, destination_file_path))
-            except sqlite3.OperationalError as e:
-                print('WARNING: Could not copy "{}" data. SQL Error: "{}"'.format(dao.TABLE, e))
+    def __init__(self, mapping_file_path):
+        self._map = {}
+        with open(mapping_file_path) as json_file:
+            self._map  = json.load(json_file)
 
-        destination_database = Database(destination_file_path)
-        for table in table_rows:
-            rows = [list(r) for r in table_rows.get(table)]
-            destination_database.insert_multiple(table, rows)
+    def get_display_text(self, component, key, default_text=True):
+        display_text = '{}_{}'.format(str(component), str(key)) if default_text else None
+        component_map = self._map.get(self._DISPLAY_TEXT_MAP).get(component)
+        if component_map:
+            display_text = component_map.get(key, display_text)
+        return display_text
+
+    def get_database_name(self, component, key):
+        component_map = self.SCHEMA.get(self._DISPLAY_TEXT_MAP).get(component)
+        if component_map:
+            return component_map.get(key)
+        return None
+
+
 
 
 

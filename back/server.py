@@ -5,10 +5,10 @@ from http import HTTPStatus
 from flask import Flask, request, Response
 from flask_cors import CORS
 
-from Library.constants import CookieNames, SCHEMA, CvParts
+from Library.constants import CookieNames, Schema, Component
+from Library.Utilities.core import Formatting
 from Library.html import HTMLModals
 from Library.logic import Controller, Authenticator
-from Library.core import Formatting
 
 BASE_URL = '192.168.8.100:8888'
 DB_PATH = '/Users/joshnicholls/Desktop/myCV/data.db'
@@ -19,6 +19,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 controller = Controller(DB_PATH)
 authenticator = Authenticator(DB_PATH)
+html_modals = HTMLModals('/Users/joshnicholls/Desktop/myCV/mapping.json')
 
 
 def build_response(data, status_code=HTTPStatus.OK):
@@ -103,10 +104,10 @@ def delete():
 
     if all([True for var in [session_key, user_id_from_cookie, delete_dict] if var is not None]):
         if authenticator.validate_session(session_key, user_id_from_cookie):
-            controller.delete(delete_dict.get('delete_type'), delete_dict.get(SCHEMA.ID))
+            controller.delete(delete_dict.get('delete_type'), delete_dict.get(Schema.ID))
 
             # Force sign out if deleting user, for everything else just refresh.
-            if delete_dict.get('delete_type') == CvParts.INFO:
+            if delete_dict.get('delete_type') == Component.USER:
                 response_dict = {'success': 'Data deleted!', 'signout': ''}
             else:
                 response_dict = {'success': 'Data deleted!', 'refresh': None}
@@ -174,19 +175,19 @@ def sign_up():
 @app.route('/html/modal/share', methods=['GET'])
 def share_modal():
     requested_user_id = request.args.get('user_id', default=None, type=str)
-    modal_html = HTMLModals.share_modal(BASE_URL, requested_user_id)
+    modal_html = html_modals.share_modal(BASE_URL, requested_user_id)
     return build_response(json.dumps(modal_html))
 
 
 @app.route('/html/modal/login', methods=['GET'])
 def login_modal():
-    modal_html = HTMLModals.login_modal()
+    modal_html = html_modals.login_modal()
     return build_response(json.dumps(modal_html))
 
 
 @app.route('/html/modal/signup', methods=['GET'])
 def signup_modal():
-    modal_html = HTMLModals.signup_modal()
+    modal_html = html_modals.signup_modal()
     return build_response(json.dumps(modal_html))
 
 
@@ -203,7 +204,7 @@ def edit_modal():
 def add_modal():
     requested_add_type = request.args.get('add_type', default=None, type=str)
     requested_row_id = request.args.get('row_id', default=None, type=str)
-    modal_html = HTMLModals.add_modal(requested_add_type, requested_row_id)
+    modal_html = html_modals.add_modal(requested_add_type, requested_row_id)
     return build_response(json.dumps(modal_html))
 
 
@@ -211,7 +212,7 @@ def add_modal():
 def delete_modal():
     requested_delete_type = request.args.get('delete_type', default=None, type=str)
     requested_row_id = request.args.get('row_id', default=None, type=str)
-    modal_html = HTMLModals.delete_modal(requested_delete_type, requested_row_id)
+    modal_html = html_modals.delete_modal(requested_delete_type, requested_row_id)
     return build_response(json.dumps(modal_html))
 
 
