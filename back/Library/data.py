@@ -1,8 +1,9 @@
 import datetime
 import json
 
-from Library.constants import Schema, Components
-from Library.core import Database, Formatting
+from Library.constants import Schema, Component, Key
+from Library.Utilities.core import Formatting
+from Library.Utilities.database import Database
 
 
 class DAO:
@@ -64,6 +65,14 @@ class DAO:
         return self._database.delete(self.TABLE, where_condition)
 
 
+class UserAddedItemsDAO(DAO):
+    TABLE = 'UserAddedItems'
+    SCHEMA = [Schema.ID, Schema.TYPE, Key.H1, Schema.COUNT, Schema.VERIFIED]
+
+    def __init__(self, database_file_path):
+        super().__init__(database_file_path)
+
+
 class UsersDAO(DAO):
     TABLE = 'Users'
     SCHEMA = [Schema.ID, Schema.EMAIL, Schema.HIDDEN]
@@ -100,7 +109,7 @@ class SessionsDAO(DAO):
 
 class DetailsDAO(DAO):
     TABLE = 'Details'
-    SCHEMA = [Schema.ID, Schema.USER, Schema.DISPLAY_NAME, Schema.HEADLINE]
+    SCHEMA = [Schema.ID, Schema.USER, Key.H1, Key.H2]
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
@@ -108,7 +117,7 @@ class DetailsDAO(DAO):
 
 class AboutDAO(DAO):
     TABLE = 'About'
-    SCHEMA = [Schema.ID, Schema.USER, Schema.TEXT]
+    SCHEMA = [Schema.ID, Schema.USER, Key.TEXT]
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
@@ -116,7 +125,7 @@ class AboutDAO(DAO):
 
 class ExperiencesDAO(DAO):
     TABLE = 'Experiences'
-    SCHEMA = [Schema.ID, Schema.USER, Schema.EMPLOYER, Schema.ROLE, Schema.START, Schema.END, Schema.TEXT]
+    SCHEMA = [Schema.ID, Schema.USER, Key.H1, Key.H2, Key.START, Key.END, Key.TEXT]
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
@@ -125,71 +134,30 @@ class ExperiencesDAO(DAO):
 
 class QualificationsDAO(DAO):
     TABLE = 'Qualifications'
-    SCHEMA = [Schema.ID, Schema.USER, Schema.SCHOOL, Schema.SUBJECT, Schema.START, Schema.END, Schema.TEXT]
+    SCHEMA = [Schema.ID, Schema.USER, Key.H1, Key.H2, Key.START, Key.END, Key.TEXT]
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
         self.date_time_columns = [Schema.START, Schema.END]
 
 
-class UserAddedItemsDAO(DAO):
-    TABLE = 'UserAddedItems'
-    SCHEMA = [Schema.ID, Schema.TYPE, Schema.DISPLAY_NAME, Schema.COUNT, Schema.VERIFIED]
-
-    def __init__(self, database_file_path):
-        super().__init__(database_file_path)
-
-
 class Mapping:
     # JSON file map keys.
     _DISPLAY_TEXT_MAP = 'display_text_map'
 
-    # Component Column Keys.
-    TITLE = 'title'
-    H1 = 'header_1'
-    H2 = 'header_2'
-    START = 'start_date'
-    END = 'end_date'
-    TEXT = 'text'
-
-    # Keys in display order.
-    KEYS = [H1, H2, START, END, TEXT]
-
     DAOS = {
-        Components.DETAILS: DetailsDAO,
-        Components.ABOUT: AboutDAO,
-        Components.EXPERIENCE: ExperiencesDAO,
-        Components.QUALIFICATION: QualificationsDAO
-    }
-
-    SCHEMA = {
-        Components.DETAILS: {
-            H1: Schema.DISPLAY_NAME,
-            H2: Schema.HEADLINE,
-        },
-        Components.ABOUT: {
-            TEXT: Schema.TEXT,
-        },
-        Components.EXPERIENCE: {
-            H1: Schema.EMPLOYER,
-            H2: Schema.ROLE,
-            START: Schema.START,
-            END: Schema.END,
-            TEXT: Schema.TEXT
-        },
-        Components.QUALIFICATION: {
-            H1: Schema.SCHOOL,
-            H2: Schema.SUBJECT,
-            START: Schema.START,
-            END: Schema.END,
-            TEXT: Schema.TEXT
-        }
+        Component.AUTHENTICATION: AuthenticationDAO,
+        Component.USER: UsersDAO,
+        Component.DETAILS: DetailsDAO,
+        Component.ABOUT: AboutDAO,
+        Component.EXPERIENCE: ExperiencesDAO,
+        Component.QUALIFICATION: QualificationsDAO
     }
 
     def __init__(self, mapping_file_path):
         self._map = {}
         with open(mapping_file_path) as json_file:
-            self._map  = json.load(json_file)
+            self._map = json.load(json_file)
 
     def get_display_text(self, component, key, default_text=True):
         display_text = '{}_{}'.format(str(component), str(key)) if default_text else None
@@ -198,11 +166,6 @@ class Mapping:
             display_text = component_map.get(key, display_text)
         return display_text
 
-    def get_database_name(self, component, key):
-        component_map = self.SCHEMA.get(self._DISPLAY_TEXT_MAP).get(component)
-        if component_map:
-            return component_map.get(key)
-        return None
 
 
 
